@@ -112,8 +112,7 @@ public class Main extends JavaPlugin implements Listener{
 		    	sign.setLine(1, ChatColor.MAGIC + "XXXXXXXXXXXXXXX");
 		    	sign.setLine(2, ChatColor.RED + "Looking good");
 		    	sign.setLine(3, ChatColor.MAGIC + "XXXXXXXXXXXXXXX");
-		    	player.sendMessage(ChatColor.GREEN + "Sign events seem to be working properly.")
-		    	;
+		    	player.sendMessage(ChatColor.GREEN + "Sign events seem to be working properly.");
 		    }
 	
 		}
@@ -125,18 +124,20 @@ public class Main extends JavaPlugin implements Listener{
 		int ammount;
 		Material item;
 		double price;
-		if (block.getType() == Material.WALL_SIGN || block.getType() == Material.SIGN_POST) {
-			Sign sign = (Sign) block.getState();
-			String signhead = sign.getLine(0);
-			if(signhead.equalsIgnoreCase(ChatColor.DARK_GREEN + "[" + ChatColor.RED + "TSC Shop" + ChatColor.DARK_GREEN + "]")){
-				ammount = Integer.valueOf(sign.getLine(1));
-				item = Material.getMaterial(sign.getLine(2).toUpperCase());
-				price = Double.parseDouble(sign.getLine(3));
-				if(economy.has(player.getPlayer(), price)){
-					economy.bankWithdraw(player.getName(), price);
-					player.getInventory().addItem(new ItemStack(item, ammount));
-				} else {
-					player.sendMessage(ChatColor.RED + "You have insufficient funds!");
+		if (!block.isEmpty()){
+			if (block.getType() == Material.WALL_SIGN || block.getType() == Material.SIGN_POST) {
+				Sign sign = (Sign) block.getState();
+				String signhead = sign.getLine(0);
+				if(signhead.equalsIgnoreCase(ChatColor.DARK_GREEN + "[" + ChatColor.RED + "TSC Shop" + ChatColor.DARK_GREEN + "]")){
+					ammount = Integer.valueOf(sign.getLine(1));
+					item = Material.getMaterial(sign.getLine(2).toUpperCase());
+					price = Double.parseDouble(sign.getLine(3));
+					if(economy.has(player.getPlayer(), price)){
+						economy.bankWithdraw(player.getName(), price);
+						player.getInventory().addItem(new ItemStack(item, ammount));
+					} else {
+						player.sendMessage(ChatColor.RED + "You have insufficient funds!");
+					}
 				}
 			}
 		}
