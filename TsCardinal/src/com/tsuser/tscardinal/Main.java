@@ -112,8 +112,7 @@ public class Main extends JavaPlugin implements Listener{
 		    	sign.setLine(1, ChatColor.MAGIC + "XXXXXXXXXXXXXXX");
 		    	sign.setLine(2, ChatColor.RED + "Looking good");
 		    	sign.setLine(3, ChatColor.MAGIC + "XXXXXXXXXXXXXXX");
-		    	player.sendMessage(ChatColor.GREEN + "Sign events seem to be working properly.")
-		    	;
+		    	player.sendMessage(ChatColor.GREEN + "Sign events seem to be working properly.");
 		    }
 	
 		}
