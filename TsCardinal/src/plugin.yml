@@ -1,0 +1,34 @@
+name: TsCardinal
+main: com.tsuser.tscardinal.Main
+version: 3.52.7
+description: Fully automated server management plugin, based off SOA
+author: Tsuser1
+depend: [Vault]
+commands:
+  cardinal:
+    description: 'Access TsCardinal''s controls'
+    permission: tscardinal.user
+    aliases:
+      - tsc
+      - tscardinal
+      - sao
+  authorize:
+    description: 'Ability to permit very high level commands'
+    permission: tscardinal.gm
+    aliases:
+      - tsca
+      - cardauth
+      - auth-sao
+permissions:
+  tscardinal.user:
+    description: 'Permission on access user level controls'
+    default: true
+  tscardinal.admin:
+    description: 'Permission to access administrator level controls'
+    default: op
+  tscardinal.gm:
+    description: 'Permission to access Game Master level controls'
+    default: op
+    children:
+      tscardinal.admin: true
+      tscardinal.user: true
