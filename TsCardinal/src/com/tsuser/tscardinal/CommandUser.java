@@ -53,12 +53,12 @@ public class CommandUser {
 	}
 	public static String findPerm(CommandSender sender){
 		String permLevelStr;
-		if(sender.hasPermission("tscardinal.user")){
-			permLevelStr = ChatColor.GREEN + "User";
+		if(sender.hasPermission("tscardinal.gm")){
+			permLevelStr = ChatColor.DARK_RED + "GameMaster";
 		} else if(sender.hasPermission("tscardinal.admin")){
 			permLevelStr = ChatColor.YELLOW + "Admin";
-		} else if(sender.hasPermission("tscardinal.gm")){
-			permLevelStr = ChatColor.DARK_RED + "GameMaster";
+		} else if(sender.hasPermission("tscardinal.user")){
+			permLevelStr = ChatColor.GREEN + "User";
 		} else {
 			permLevelStr = ChatColor.RED + "" + ChatColor.ITALIC + "Unknown - Contact a GM";
 		}
@@ -67,7 +67,7 @@ public class CommandUser {
 	public static String findLevel(CommandSender sender){
 		String userLevel;
 		if(sender.hasPermission("tscardinal.gm") || sender.hasPermission("tscardinal.admin")){
-			userLevel = ChatColor.RED + "Admins don't have a level";
+			userLevel = ChatColor.RED + "" + ChatColor.ITALIC + "Admins don't have a level";
 		} else {
 			userLevel = ChatColor.RED + "Feature not ready, sorry!";
 		}

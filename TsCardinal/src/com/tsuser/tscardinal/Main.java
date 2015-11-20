@@ -1,12 +1,14 @@
 package com.tsuser.tscardinal;
 
 import java.util.HashMap;
+
 import net.md_5.bungee.api.ChatColor;
 import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
 
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
@@ -35,6 +37,7 @@ public class Main extends JavaPlugin implements Listener{
     public static Permission permission = null;
     public static Economy economy = null;
     public static Chat chat = null;
+    //private Database sql; //dynamic pricing coming soon...
 	public void onEnable(){
         setupPermissions();
         setupChat();
@@ -46,6 +49,7 @@ public class Main extends JavaPlugin implements Listener{
 		pm.registerEvents(this, Main.getPlugin(com.tsuser.tscardinal.Main.class));
 		getLogger().info(Ansi.ansi().fg(Ansi.Color.RED) + "TsCardinal has been enabled!" + resetAnsi);
 	}
+	
     private boolean setupPermissions()
     {
         RegisteredServiceProvider<Permission> permissionProvider = getServer().getServicesManager().getRegistration(net.milkbowl.vault.permission.Permission.class);
@@ -93,14 +97,19 @@ public class Main extends JavaPlugin implements Listener{
 		  if (!event.isCancelled()) {
 		    SignChangeEvent sign=event;
 		    Player player=event.getPlayer();
+		    Block block=event.getBlock();
 		    if (sign.getLine(0).equalsIgnoreCase("[tscshop]") && (player.hasPermission("tscardinal.admin"))) {
-		        if (isInteger(sign.getLine(1),16)) {
+		        if (isInteger(sign.getLine(1),16) && isInteger(sign.getLine(3),16)) {
 		        	//sign.setLine(3,ChatColor.GRAY + player.getName());
 		        	//sign.setLine(2, ChatColor.RED + "Not ready yet");
-		        	sign.setLine(0, ChatColor.DARK_GREEN + "[" + ChatColor.RED + "TSC Shop" + ChatColor.DARK_GREEN + "]");
+		        	sign.setLine(0, ChatColor.DARK_GREEN + "[" + ChatColor.GREEN + "TSC Shop" + ChatColor.DARK_GREEN + "]");
 		        	player.sendMessage(ChatColor.GREEN + "Shop created! Item: " + sign.getLine(2) + " Ammt: " + sign.getLine(1) + " Price: " + economy.format(Double.valueOf(sign.getLine(3))));
-		        	} else {
-		        	sign.setLine(0, ChatColor.DARK_RED + "TSC Shop");
+		        	if(Material.getMaterial(sign.getLine(2).toUpperCase()) == null){
+		        		block.breakNaturally();
+		        		player.sendMessage(ChatColor.RED + "Sorry, but that item wasn't valid!");
+		        	}
+		        } else {
+		        	sign.setLine(0, ChatColor.DARK_RED + "*TSC Shop*");
 		        	sign.setLine(1,ChatColor.RED + "ITEM_AMMOUNT");
 		        	sign.setLine(2,ChatColor.RED + "ITEM_NAME");
 		        	sign.setLine(3,ChatColor.RED + "ITEM_PRICE");
@@ -124,22 +133,55 @@ public class Main extends JavaPlugin implements Listener{
 		int ammount;
 		Material item;
 		double price;
-		if (!block.isEmpty()){
-			if (block.getType() == Material.WALL_SIGN || block.getType() == Material.SIGN_POST) {
-				Sign sign = (Sign) block.getState();
-				String signhead = sign.getLine(0);
-				if(signhead.equalsIgnoreCase(ChatColor.DARK_GREEN + "[" + ChatColor.RED + "TSC Shop" + ChatColor.DARK_GREEN + "]")){
-					ammount = Integer.valueOf(sign.getLine(1));
-					item = Material.getMaterial(sign.getLine(2).toUpperCase());
-					price = Double.parseDouble(sign.getLine(3));
-					if(economy.has(player.getPlayer(), price)){
-						economy.bankWithdraw(player.getName(), price);
-						player.getInventory().addItem(new ItemStack(item, ammount));
-					} else {
-						player.sendMessage(ChatColor.RED + "You have insufficient funds!");
+		switch (Event.getAction()){
+			case LEFT_CLICK_BLOCK:
+				if(player.getGameMode().equals(GameMode.CREATIVE) && player.hasPermission("tscardinal.admin")){
+					player.sendMessage(ChatColor.GREEN + "Sign removed sucessfully.");
+				} else { 
+					Event.setCancelled(true);
+					if (block != null){
+						if (block.getType() == Material.WALL_SIGN || block.getType() == Material.SIGN_POST) {
+							Sign sign = (Sign) block.getState();
+							String signhead = sign.getLine(0);
+							if(signhead.equalsIgnoreCase(ChatColor.DARK_GREEN + "[" + ChatColor.GREEN + "TSC Shop" + ChatColor.DARK_GREEN + "]")){
+								ammount = Integer.valueOf(sign.getLine(1));
+								item = Material.getMaterial(sign.getLine(2).toUpperCase());
+								price = Double.parseDouble(sign.getLine(3));
+								if(economy.has(player.getPlayer(), price)){
+									economy.bankWithdraw(player.getName(), price);
+									player.getInventory().addItem(new ItemStack(item, ammount));
+									player.sendMessage(ChatColor.GREEN + "You bought " + ammount + "x" + sign.getLine(2) + " for " + economy.format(price) + "!");
+								} else {
+									player.sendMessage(ChatColor.RED + "You have insufficient funds!");
+								}
+							}
+						}
 					}
 				}
-			}
+				break;
+			case RIGHT_CLICK_BLOCK:
+				if (block != null){
+					if (block.getType() == Material.WALL_SIGN || block.getType() == Material.SIGN_POST) {
+						Sign sign = (Sign) block.getState();
+						String signhead = sign.getLine(0);
+						if(signhead.equalsIgnoreCase(ChatColor.DARK_GREEN + "[" + ChatColor.GREEN + "TSC Shop" + ChatColor.DARK_GREEN + "]")){
+							ammount = Integer.valueOf(sign.getLine(1));
+							item = Material.getMaterial(sign.getLine(2).toUpperCase());
+							price = Double.parseDouble(sign.getLine(3));
+							if(player.getInventory().contains(item, ammount)){
+								economy.bankDeposit(player.getName(), price);
+								player.getInventory().removeItem(new ItemStack(item, ammount));
+								player.sendMessage(ChatColor.GREEN + "You sold " + ammount + "x" + sign.getLine(2) + " for " + economy.format(price) + "!");
+							} else {
+								player.sendMessage(ChatColor.RED + "You have insufficient resources to sell!");
+							}
+						}
+					}
+				}
+				break;
+			default:
+				//Do nothing, we shouldn't care about anything else
+			break;
 		}
 	}
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args){
