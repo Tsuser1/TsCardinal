@@ -1,9 +1,9 @@
 name: TsCardinal
 main: com.tsuser.tscardinal.Main
-version: 3.52.7
+version: 7.35.8
 description: Fully automated server management plugin, based off SOA
 author: Tsuser1
-depend: [Vault]
+depend: [Vault, SQLibrary]
 commands:
   cardinal:
     description: 'Access TsCardinal''s controls'
